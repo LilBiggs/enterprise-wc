@@ -17,6 +17,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const calendar: any = document.querySelector<IdsCalendar>('ids-calendar');
   const addEventMenu = document.querySelector('#add-event');
 
+  calendar?.addEventListener('beforerendermonth', (e: any) => {
+    console.log(`beforerendermonth`);
+    calendar.getView().onDayCellRender = (cellTemplate: string, dateKey: string) => {
+      console.log(`On Day Render.`);
+      return cellTemplate;
+    }
+  });
+
   const eventManager = new CustomCalendarEventManager();
 
   calendar?.addEventListener('beforeeventrendered', () => {

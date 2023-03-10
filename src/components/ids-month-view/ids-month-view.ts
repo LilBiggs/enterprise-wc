@@ -910,7 +910,7 @@ class IdsMonthView extends Base implements IdsRangeSettingsInterface {
       const colorAttr: string = legend ? `data-color="${legend.color}"` : '';
       const dateKey = this.generateDateKey(new Date(year, month, day));
 
-      return `<td aria-label="${ariaLabel}" ${dataAttr} ${classAttr} ${selectedAttr} ${colorAttr}>
+      let cellTemplate = `<td aria-label="${ariaLabel}" ${dataAttr} ${classAttr} ${selectedAttr} ${colorAttr}>
         <span class="day-container">
           <ids-text
             aria-hidden="true"
@@ -920,6 +920,12 @@ class IdsMonthView extends Base implements IdsRangeSettingsInterface {
         </span>
         ${isCompact ? '' : `<div class="events-container" data-key="${dateKey}"></div>`}
       </td>`;
+
+      if (typeof this.state.onDayCellRender === 'function') {
+        cellTemplate = this.state.onDayCellRender(cellTemplate, dateKey);
+      }
+
+      return cellTemplate;
     }).join('');
   }
 
@@ -955,6 +961,8 @@ class IdsMonthView extends Base implements IdsRangeSettingsInterface {
     const weeksCount = this.#isDisplayRange()
       ? weeksInRange(this.startDate, this.endDate, this.firstDayOfWeek)
       : weeksInMonth(this.year, this.month, this.day, this.firstDayOfWeek, this.localeAPI?.isIslamic());
+
+    this.triggerEvent('beforerendermonth', this, { bubbles: true, composed: true });
 
     const rowsTemplate = Array.from({ length: weeksCount }).map((_, weekIndex) => `<tr>${this.#getCellTemplate(weekIndex)}</tr>`).join('');
 
@@ -1643,6 +1651,14 @@ class IdsMonthView extends Base implements IdsRangeSettingsInterface {
       this.#clearRangeClasses();
       this.selectDay(year, month, day);
     }
+  }
+
+  public get onDayCellRender() {
+    return this.state.onDayCellRender;
+  }
+
+  public set onDayCellRender(fun) {
+    this.state.onDayCellRender = fun;
   }
 
   /**
